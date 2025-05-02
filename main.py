@@ -28,3 +28,4 @@ df = pd.DataFrame(data)
 
 #Analysis
 print("First few rows: ", df.head)
+print("Last few records:", df.tail)
