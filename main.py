@@ -1,8 +1,12 @@
 import re 
 import pandas as pd
+import glob
 
-with open("data/fells_loop.gpx", "r", encoding = "utf-8") as f:
-    gpx_data = f.read()
+gpx_files = glob.glob("data/*.gpx")
+
+for file_path in gpx_files:
+    with open(file_path, "r", encoding="utf-8") as f:
+        gpx_data = f.read()
 
 wpt_pattern = re.compile(r'<wpt lat="([^"]+)" lon="([^"]+)">(.*?)</wpt>', re.DOTALL)
 wpts = wpt_pattern.findall(gpx_data)
