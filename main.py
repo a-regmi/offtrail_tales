@@ -1,35 +1,45 @@
-import re 
+# import re
 import pandas as pd
-import glob
+# import os
 
-gpx_files = glob.glob("data/*.gpx")
+from gpx_parser import extract_gpx_data  #Importing the gpx parser
 
-for file_path in gpx_files:
-    with open(file_path, "r", encoding="utf-8") as f:
-        gpx_data = f.read()
+# Gpx_Files directory
+directory = "data"
 
-wpt_pattern = re.compile(r'<wpt lat="([^"]+)" lon="([^"]+)">(.*?)</wpt>', re.DOTALL)
-wpts = wpt_pattern.findall(gpx_data)
+# Get the extracted data from the GPX files
+gpx_data = extract_gpx_data(directory)
 
-data = []
-for lat, lon, content in wpts:
-    ele = re.search(r"<ele>(.*?)</ele>", content)
-    time = re.search(r"<time>(.*?)</time>", content)
-    name = re.search(r"<name>(.*?)</name>", content)
-    typ = re.search(r"<type><!\[CDATA\[(.*?)\]\]></type>", content)
+#Placeholder for all the data
+all_data = []
 
-    data.append({
-        "lat": float(lat),
-        "lon": float(lon),
-        "ele": float(ele.group(1)) if ele else None,
-        "time": time.group(1) if time else None,
-        "name": name.group(1) if name else None,
-        "type": typ.group(1) if typ else None
-    })
+#Looping through each file
+for filename, data in gpx_data.items():
+    for i in range(len(data['timestamps'])):
+        # Extract the information for each trackpoint
+        timestamp = data['timestamps'][i] if i < len(data['timestamps']) else None
+        elevation = data['elevations'][i] if i < len(data['elevations']) else None
+        lat_lon = data['track_points'][i] if i < len(data['track_points']) else None
+        lat = lat_lon['lat'] if lat_lon else None
+        lon = lat_lon['lon'] if lat_lon else None
+        
+        # Correct handling of speed and azimuth from xml (Direction)
+        speed = data['gps_data'][i]['speed'] if i < len(data['gps_data']) and 'speed' in data['gps_data'][i] else None
+        direction = data['gps_data'][i]['azimuth'] if i < len(data['gps_data']) and 'azimuth' in data['gps_data'][i] else None
 
-#Dataframing
-df = pd.DataFrame(data)
+        # Compile Data
+        all_data.append({
+            'Filename': filename,
+            'Timestamp': timestamp,
+            'Elevation': elevation,
+            'Latitude': lat,
+            'Longitude': lon,
+            'Speed': speed,
+            'Direction': direction  # Use 'azimuth' here as 'Direction'
+        })
 
-#Analysis
-print("First few rows: ", df.head)
-print("Last few records:", df.tail)
+# Convert to DataFrame
+df = pd.DataFrame(all_data)
+
+#print(df)
+df.to_csv("output.csv", index=False) #CSV Extract
