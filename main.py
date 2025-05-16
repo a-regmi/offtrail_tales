@@ -1,4 +1,3 @@
-# import re
 import pandas as pd
 # import os
 
@@ -40,14 +39,18 @@ for filename, data in gpx_data.items():
 
 # Convert to DataFrame
 df = pd.DataFrame(all_data)
+# print(df)
 
 #Data Cleanup [speed might not be available in some GPX files]
 df['Speed'] = pd.to_numeric(df['Speed'], errors='coerce').fillna(0)
+
 #Direction(Azimuth point) cleanup defaulting to 0.0 (North) for unavailable values
 df['Direction'] = pd.to_numeric(df['Direction'], errors='coerce').fillna(0.0) 
 
-print(df)
-df.to_csv("output.csv", index=False) #CSV Extract
-
+#Pinpooint Max Speed
 max_speed = df['Speed'].max()
-print("Highest speed:", max_speed)
+max_row = df.loc[df['Speed'].idxmax()]
+print("📍 Row with Max Speed:")
+print(max_row.to_frame().T)  # display as a 1-row DataFrame
+
+# df.to_csv("output.csv", index=False) #CSV Extract
