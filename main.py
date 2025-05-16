@@ -41,5 +41,12 @@ for filename, data in gpx_data.items():
 # Convert to DataFrame
 df = pd.DataFrame(all_data)
 
-#print(df)
+#Data Cleanup [speed might not be available in some GPX files]
+df['Speed'] = pd.to_numeric(df['Speed'], errors='coerce').fillna(0)
+df['Direction'] = df['Direction'].fillna(pd.NA)
+
+print(df)
 df.to_csv("output.csv", index=False) #CSV Extract
+
+max_speed = df['Speed'].max()
+print("Highest speed:", max_speed)
