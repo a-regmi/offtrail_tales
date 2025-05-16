@@ -1,7 +1,12 @@
 import pandas as pd
-# import os
-
 from gpx_parser import extract_gpx_data  #Importing the gpx parser
+import webbrowser
+#Future Expansions
+#import folium as fo 
+#import matplotlib.pyplot as plt
+#from lxml import etree
+
+
 
 # Gpx_Files directory
 directory = "data"
@@ -41,16 +46,28 @@ for filename, data in gpx_data.items():
 df = pd.DataFrame(all_data)
 # print(df)
 
-#Data Cleanup [speed might not be available in some GPX files]
+#Data Cleanup [Spped("" = 0.0) and Azimuth ("" = 0.0 {Default {North}))]
 df['Speed'] = pd.to_numeric(df['Speed'], errors='coerce').fillna(0)
-
-#Direction(Azimuth point) cleanup defaulting to 0.0 (North) for unavailable values
 df['Direction'] = pd.to_numeric(df['Direction'], errors='coerce').fillna(0.0) 
 
 #Pinpooint Max Speed
 max_speed = df['Speed'].max()
-max_row = df.loc[df['Speed'].idxmax()]
+max_speed_row = df.loc[df['Speed'].idxmax()]  # Get row with max speed
+lat, lon = max_speed_row['Latitude'], max_speed_row['Longitude']
+timestamp = max_speed_row['Timestamp']
 print("📍 Row with Max Speed:")
-print(max_row.to_frame().T)  # display as a 1-row DataFrame
+print(max_speed_row.to_frame().T)  # display as a 1-row DataFrame
+
+
+#Location in Google Earth URL(Off trail):
+url = f"https://earth.google.com/web/@{lat},{lon},1500a,2000d,35y,0h,0t,0r"
+print(f"This is where you hit the max speed of {max_speed:.2f} mph at {timestamp}: ")
+print(f"Droppin:", url)
+webbrowser.open(url)
+
+#Pinpoint
+...#future Enhancement
 
 # df.to_csv("output.csv", index=False) #CSV Extract
+
+
