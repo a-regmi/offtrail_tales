@@ -43,7 +43,8 @@ df = pd.DataFrame(all_data)
 
 #Data Cleanup [speed might not be available in some GPX files]
 df['Speed'] = pd.to_numeric(df['Speed'], errors='coerce').fillna(0)
-df['Direction'] = df['Direction'].fillna(pd.NA)
+#Direction(Azimuth point) cleanup defaulting to 0.0 (North) for unavailable values
+df['Direction'] = pd.to_numeric(df['Direction'], errors='coerce').fillna(0.0) 
 
 print(df)
 df.to_csv("output.csv", index=False) #CSV Extract
