@@ -3,12 +3,10 @@
 ## About the Project
 Analyze GPX data to track and extract meaningful insights from personal trail records—whether skiing, mountain biking, running, hiking, or logging laps and runs. Designed to analyze performance across diverse activities, uncover patterns in terrain usage, track progress over time, and deliver a deeper understanding of outdoor experiences through detailed metrics and visualizations.
 
-**Note:**  
-- **Speed Data:** Hiking GPX data might not have speed information (e.g., GPX data from AllTrails often lacks speed data).  
-- GPX data from Slopes app provides speed information for positional instances.
-
-- **Direction:** Some GPX files may not include direction (azimuth) values. In such cases, azimuth values defaulted to 0.0 (facing North).
-
+> **Note:**  
+> - Speed data from hiking GPX files (e.g., AllTrails) may be missing.  
+> - GPX files from Slopes provide speed data per location point.  
+> - If direction (azimuth) is missing, a default direction of **0°(N)** North is assumed.
 
 ## Features
 - Calculate Speed using positional trail records.
@@ -18,15 +16,16 @@ Analyze GPX data to track and extract meaningful insights from personal trail re
 
 ## Data and Files 
 - Accepts GPS data in GPX file format (`.gpx`).  
-- Compatible with files from popular apps like AllTrails and Slopes, and OsmAndMaps
+- Compatible with files from popular apps like AllTrails and Slopes, and OsmAndMaps.
+**Note:**
+- **GPX file:** `.gpx` would need a manual extract from apps listed above
 
 ## Tech Stack
 - Python  
 - Python Libraries(Pandas, glob, Webbrowser, BeautifulSoup)
 
 ## License
-This project is licensed under the MIT License.  
-See the [LICENSE](./LICENSE) file for full details.
+This project is licensed under the MIT License. Full Details: [LICENSE](./LICENSE)
 
 ## Getting Started
 1. Obtain GPX files from your device or favorite app.  
