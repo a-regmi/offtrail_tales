@@ -19,7 +19,7 @@ def extract_gpx_data(directory):
                 timestamps = []
                 elevations = []
                 track_points = []
-                gps_data = []
+                azimuth = []
 
                 for trkpt in soup.find_all('trkpt'):
                     lat = trkpt.get('lat')
@@ -28,7 +28,6 @@ def extract_gpx_data(directory):
                     ele = trkpt.find('ele')
 
                     # Defaults
-                    speed = None
                     azimuth = None
 
                     # Getting speed and azimuth<extensions><gte:gps ... />
@@ -36,15 +35,13 @@ def extract_gpx_data(directory):
                     if extensions:
                         gps_tag = extensions.find('gte:gps')
                         if gps_tag:
-                            speed = gps_tag.get('speed')
                             azimuth = gps_tag.get('azimuth')
 
                     # Collect data
                     timestamps.append(time.text.strip() if time else None)
                     elevations.append(ele.text.strip() if ele else None)
                     track_points.append({'lat': lat, 'lon': lon})
-                    gps_data.append({
-                        'speed': speed,
+                    azimuth.append({
                         'azimuth': azimuth
                     })
 
@@ -52,7 +49,7 @@ def extract_gpx_data(directory):
                     'timestamps': timestamps,
                     'elevations': elevations,
                     'track_points': track_points,
-                    'gps_data': gps_data
+                    'azimuth': azimuth
                 }
 
         except Exception as e:
