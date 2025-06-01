@@ -130,6 +130,13 @@ def calculate_speed(track_points):
             continue
         try:
             dist = haversine_distance(prev['lat'], prev['lon'], curr['lat'], curr['lon'])
+            
+            # Filter out unrealistic distances (GPS jitter)
+            # 0.0006 miles ≈ 1 meter - ignore very tiny movements that might be GPS noise
+            if dist < 0.0006:
+                speeds.append(speeds[-1])  # Keep previous speed
+                continue
+
             # Parse timestamps if available
             t1 = prev.get('time')
             t2 = curr.get('time')
@@ -139,25 +146,37 @@ def calculate_speed(track_points):
                     dt1 = parser.parse(t1)
                     dt2 = parser.parse(t2)
                     time_delta = (dt2 - dt1).total_seconds()
-                    print(f"dist={dist:.2f}m, time_delta={time_delta:.2f}s, speed={dist/time_delta if time_delta else 0:.2f} m/s, t1={t1}, t2={t2}")
+                    
+                    # Skip if time difference is too small or too large
+                    if time_delta < 1 or time_delta > 30:  # Skip intervals <1s or >30s
+                        speeds.append(speeds[-1])  # Keep previous speed
+                        continue
+                        
+                    # Calculate speed in mph
+                    speed = (dist / time_delta) * 3600
+                    
+                    # Apply activity-based speed limits
+                    # Skiing: max ~60 mph
+                    # Hiking: max ~15 mph
+                    # Biking: max ~45 mph
+                    MAX_SPEED = 60  # mph, absolute maximum
+                    if speed > MAX_SPEED:
+                        speed = speeds[-1]  # Keep previous speed if unrealistic
+                    
+                    print(f"dist={dist:.4f}mi, time_delta={time_delta:.2f}s, speed={speed:.2f} mph, t1={t1}, t2={t2}")
                 except Exception as ex:
                     print(f"Timestamp parse error: {ex}")
-                    time_delta = 0
-            else:
-                time_delta = 0
-            if time_delta and time_delta > 0:
-                # Convert from m/s to mph:
-                # First get m/s: dist(m) / time(s)
-                # Then convert to mph: * (3600 seconds/1 hour) / (1609.344 meters/mile)
-                speed = (dist / time_delta) * (3600 / 1609.344)  # converts to mph
+                    speed = 0
             else:
                 speed = 0
+
+            # Debug output
+            print(f"DEBUG: i={i}, prev=({prev['lat']}, {prev['lon']}, {prev.get('time')}), curr=({curr['lat']}, {curr['lon']}, {curr.get('time')}), dist={dist:.4f}mi, time_delta={time_delta:.2f}s, speed={speed:.2f} mph")
+
         except Exception as e:
             print(f"Error calculating speed: {e}")
-            speed = 0
+            speed = speeds[-1]  # Keep previous speed on error
                 
-        # Debug output for every segment
-        print(f"DEBUG: i={i}, prev=({prev['lat']}, {prev['lon']}, {prev.get('time')}), curr=({curr['lat']}, {curr['lon']}, {curr.get('time')}), dist={dist:.2f}m, time_delta={time_delta:.2f}s, speed={speed:.2f} mph")
         # Check for out-of-order timestamps
         if t1 and t2 and dt2 < dt1:
             print(f"WARNING: Out-of-order timestamps at i={i}: t1={t1}, t2={t2}")
@@ -174,13 +193,13 @@ def haversine_distance(lat1, lon1, lat2, lon2):
         lon2 = float(lon2)
     except (TypeError, ValueError):
         return 0  # Return 0 distance if conversion fails
-    R = 6371000  # Earth radius in meters
+    R = 3958.8  # Earth radius in miles
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
     a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
+    return R * c  # Returns distance in miles
 
 
 if __name__ == "__main__":
