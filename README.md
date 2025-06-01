@@ -24,7 +24,7 @@ Analyze GPX data to track and extract meaningful insights from personal trail re
 - Python  
 - Python Libraries(Pandas, glob, Webbrowser, BeautifulSoup)
 
-## License
+## License 📄 
 This project is licensed under the MIT License. Full Details: [LICENSE](./LICENSE)
 
 ## Getting Started
