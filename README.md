@@ -18,7 +18,7 @@ Analyze GPX data to track and extract meaningful insights from personal trail re
 - Accepts GPS data in GPX file format (`.gpx`).  
 - Compatible with files from popular apps like AllTrails and Slopes, and OsmAndMaps.
 **Note:**
-- **GPX file:** `.gpx` would need a manual extract from apps listed above
+> - `.gpx` would need a manual extract from apps listed above
 
 ## Tech Stack
 - Python  
