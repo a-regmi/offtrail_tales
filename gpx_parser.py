@@ -40,7 +40,7 @@ def extract_gpx_data(directory):
                     # Collect data
                     timestamps.append(time.text.strip() if time else None)
                     elevations.append(ele.text.strip() if ele else None)
-                    track_points.append({'lat': lat, 'lon': lon})
+                    track_points.append({'lat': lat, 'lon': lon, 'time': time.text.strip() if time else None})
                     azimuths.append({
                         'azimuth': az_value
                     })

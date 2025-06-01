@@ -112,10 +112,15 @@ def datacompiler():
     return all_data
 
 
-def calculate_speed(track_points, time_interval=3):
+def calculate_speed(track_points):
     speeds = [0]  # speed for first point
     if not track_points or len(track_points) < 2:
-        return speeds  # just [0] or empty list if no points
+        return speeds
+
+    # Debug: print first few track points
+    print("First 3 track points for speed calculation:")
+    for pt in track_points[:3]:
+        print(pt)
 
     for i in range(1, len(track_points)):
         prev = track_points[i - 1]
@@ -125,11 +130,38 @@ def calculate_speed(track_points, time_interval=3):
             continue
         try:
             dist = haversine_distance(prev['lat'], prev['lon'], curr['lat'], curr['lon'])
-        except KeyError as e:
-            print(f"Missing key in track point: {e}")
-            speeds.append(0)
-            continue
-        speed = dist / time_interval
+            # Parse timestamps if available
+            t1 = prev.get('time')
+            t2 = curr.get('time')
+            if t1 and t2:
+                from dateutil import parser
+                try:
+                    dt1 = parser.parse(t1)
+                    dt2 = parser.parse(t2)
+                    time_delta = (dt2 - dt1).total_seconds()
+                    print(f"dist={dist:.2f}m, time_delta={time_delta:.2f}s, speed={dist/time_delta if time_delta else 0:.2f} m/s, t1={t1}, t2={t2}")
+                except Exception as ex:
+                    print(f"Timestamp parse error: {ex}")
+                    time_delta = 0
+            else:
+                time_delta = 0
+            if time_delta and time_delta > 0:
+                # Convert from m/s to mph:
+                # First get m/s: dist(m) / time(s)
+                # Then convert to mph: * (3600 seconds/1 hour) / (1609.344 meters/mile)
+                speed = (dist / time_delta) * (3600 / 1609.344)  # converts to mph
+            else:
+                speed = 0
+        except Exception as e:
+            print(f"Error calculating speed: {e}")
+            speed = 0
+                
+        # Debug output for every segment
+        print(f"DEBUG: i={i}, prev=({prev['lat']}, {prev['lon']}, {prev.get('time')}), curr=({curr['lat']}, {curr['lon']}, {curr.get('time')}), dist={dist:.2f}m, time_delta={time_delta:.2f}s, speed={speed:.2f} mph")
+        # Check for out-of-order timestamps
+        if t1 and t2 and dt2 < dt1:
+            print(f"WARNING: Out-of-order timestamps at i={i}: t1={t1}, t2={t2}")
+
         speeds.append(speed)
     return speeds
 
